@@ -5,11 +5,13 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
-import { AngularMaterialModule } from './angular-material.module';
+import { AngularMaterialModule } from './_modules/angular-material.module';
+import { MjComponent } from './mj/mj.component';
 
 @NgModule({
   declarations: [
-    AppComponent
+    AppComponent,
+    MjComponent
   ],
   imports: [
     BrowserModule,
