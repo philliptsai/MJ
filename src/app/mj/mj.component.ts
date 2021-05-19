@@ -3,6 +3,7 @@ import { Scene, PerspectiveCamera, WebGLRenderer, MeshBasicMaterial, Mesh, BoxBu
 import { WindowSizeService } from 'src/app/_services/window-size.service';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
+import { ThreeService } from '../_services/three.service';
 
 @Component({
   selector: 'app-mj',
@@ -14,38 +15,30 @@ export class MjComponent implements OnInit, AfterViewInit, OnDestroy {
   destroy$ = new Subject<void>();
 
   /** three variables */
-  scene: Scene = new Scene();
-  camera: PerspectiveCamera = new PerspectiveCamera(50, 1, 0.1, 2000);
-  renderer: WebGLRenderer = new WebGLRenderer();
   geometry: BoxBufferGeometry = null;
   material: MeshBasicMaterial = null;
   mesh: Mesh = null;
 
   constructor(
     private windowSizeService: WindowSizeService,
-    private elementRef: ElementRef
+    private elementRef: ElementRef,
+    private threeService: ThreeService
   ) { }
 
   ngOnInit(): void {
 
-    this.windowSizeService.windowSize$.pipe(takeUntil(this.destroy$)).subscribe((size) => {
-      this.camera.aspect = size.width / size.height;
-      this.camera.updateProjectionMatrix();
-      this.renderer.setSize(size.width, size.height);
-    });
-
-    this.scene.background = new Color( 0xffffff );
+    this.threeService.scene.background = new Color( 0xffffff );
 
     this.geometry = new BoxBufferGeometry();
     this.material = new MeshBasicMaterial({ color: 0x00ff00 });
     this.mesh = new Mesh(this.geometry, this.material);
 
-    this.scene.add(this.mesh);
-    this.camera.position.z = 5;
+    this.threeService.scene.add(this.mesh);
+    this.threeService.camera.position.z = 5;
   }
 
   ngAfterViewInit(): void {
-    this.elementRef.nativeElement.appendChild(this.renderer.domElement);
+    this.elementRef.nativeElement.appendChild(this.threeService.renderer.domElement);
     this.animate();
   }
 
@@ -58,7 +51,7 @@ export class MjComponent implements OnInit, AfterViewInit, OnDestroy {
     this.mesh.rotation.x += 0.02;
     this.mesh.rotation.y += 0.03;
 
-    this.renderer.render(this.scene, this.camera);
+    this.threeService.render();
     requestAnimationFrame(this.animate);
   }
 
