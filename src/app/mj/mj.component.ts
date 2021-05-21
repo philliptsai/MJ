@@ -1,9 +1,8 @@
 import { Component, OnInit, ElementRef, AfterViewInit, OnDestroy } from '@angular/core';
-import { Scene, PerspectiveCamera, WebGLRenderer, MeshBasicMaterial, Mesh, BoxBufferGeometry, Color } from 'three';
-import { WindowSizeService } from 'src/app/_services/window-size.service';
+import { MeshBasicMaterial, Mesh, BoxBufferGeometry, Color } from 'three';
 import { Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
 import { ThreeService } from '../_services/three.service';
+import { ColladaLoader } from 'three/examples/jsm/loaders/ColladaLoader.js';
 
 @Component({
   selector: 'app-mj',
@@ -14,26 +13,24 @@ export class MjComponent implements OnInit, AfterViewInit, OnDestroy {
 
   destroy$ = new Subject<void>();
 
-  /** three variables */
-  geometry: BoxBufferGeometry = null;
-  material: MeshBasicMaterial = null;
-  mesh: Mesh = null;
+  helmet: any;
 
   constructor(
-    private windowSizeService: WindowSizeService,
     private elementRef: ElementRef,
     private threeService: ThreeService
   ) { }
 
   ngOnInit(): void {
 
-    this.threeService.scene.background = new Color( 0xffffff );
+    const loader = new ColladaLoader();
 
-    this.geometry = new BoxBufferGeometry();
-    this.material = new MeshBasicMaterial({ color: 0x00ff00 });
-    this.mesh = new Mesh(this.geometry, this.material);
+    loader.load( 'assets/dragon/Dragon 2.5_dae.dae', gltf =>  {
+      this.helmet = gltf.scene;
+      this.threeService.scene.add( this.helmet );
+    });
 
-    this.threeService.scene.add(this.mesh);
+    this.threeService.scene.background = new Color( 0xdfffdf );
+
     this.threeService.camera.position.z = 5;
   }
 
@@ -48,8 +45,9 @@ export class MjComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   animate = () => {
-    this.mesh.rotation.x += 0.02;
-    this.mesh.rotation.y += 0.03;
+    if (this.helmet) {
+      this.helmet.rotation.y += 0.007;
+    }
 
     this.threeService.render();
     requestAnimationFrame(this.animate);
